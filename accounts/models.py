@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,  BaseUserManager
+import base64
+from django.utils.html import format_html
 
 # Create your models here.
 
@@ -83,11 +85,18 @@ class Profile(models.Model):
     address = models.CharField(max_length=500,blank=False)
     mobile = models.CharField(max_length=20, unique=True)
     avatar = models.ImageField(upload_to=upload_to,null=True,blank=True)
+    imageb64 = models.TextField(blank=True)
     user = models.OneToOneField(MyUser,on_delete=models.CASCADE,primary_key=True)
 
 
     def __str__(self):
         return "%s - %s" % (self.user.email,self.name)
+
+    def save(self,*args,**kwargs):
+        if self.avatar:
+            img_file = self.avatar._get_file()
+            self.imageb64 = base64.b64encode(img_file.read())
+            super().save(*args, **kwargs)
 
 
 
